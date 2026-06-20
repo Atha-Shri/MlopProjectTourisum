@@ -1,47 +1,81 @@
+name: Tourism Project Pipeline
+
 on:
   push:
     branches:
-      - main  # Automatically triggers on push to the main branch
+      - main
 
 jobs:
   register-dataset:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Check Repository Structure
-        run: ls -R
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Show Repository Structure
+        run: |
+          pwd
+          ls -la
+          find . -type f | sort
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install Dependencies
-        run: pip install -r TourismProject/requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r TourismProject/requirements.txt
+
       - name: Upload Dataset to Hugging Face Hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python TourismProject/model_building/data_register.py
 
   data-prep:
-
     needs: register-dataset
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install Dependencies
-        run: pip install -r TourismProject/requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r TourismProject/requirements.txt
+
       - name: Run Data Preparation
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python TourismProject/model_building/prep.py
 
-
   model-training:
     needs: data-prep
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Dependencies
-        run: pip install -r TourismProject/requirements.txt
-      - name: Model Training
 
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r TourismProject/requirements.txt
+
+      - name: Train Model
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python TourismProject/model_building/train.py
@@ -51,11 +85,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Dependencies
-        run: pip install -r TourismProject/requirements.txt
-      - name: Deploy to Hugging Face Space
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r TourismProject/requirements.txt
+
+      - name: Deploy to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: python TourismProject/hosting/hosting.py 
+        run: python TourismProject/hosting/hosting.py
