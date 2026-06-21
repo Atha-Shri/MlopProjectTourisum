@@ -1,4 +1,24 @@
-- name: Show Files
-  run: |
-    pwd
-    ls -R
+name: Test Workflow
+
+on:
+push:
+branches:
+- main
+
+jobs:
+debug:
+runs-on: ubuntu-latest
+
+
+steps:
+  - uses: actions/checkout@v4
+
+  - name: Show Files
+    run: |
+      pwd
+      ls -R
+
+  - name: Find Requirements
+    run: |
+      find . -name "requirements.txt"
+
